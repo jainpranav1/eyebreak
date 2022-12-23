@@ -1,0 +1,54 @@
+:root {
+    --primary: crimson;
+    --dark: #1F2937;
+    --darker: #111827;
+    --light: #F3F4F6;
+}
+
+* {
+    font-family: "Fira sans", sans-serif;
+}
+
+body {
+    background-color: var(--dark);
+    color: var(--light);
+}
+
+.watch {
+    text-align: center;
+    background-color: var(--darker);
+    padding: 20px;
+}
+
+.time {
+    font-size: 50px;
+}
+
+
+.controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.controls button {
+    border: none;
+    cursor: pointer;
+
+    color: var(--light);
+    font-size: 20px;
+    background-color: var(--primary);
+    margin: 10px;
+    padding: 10px 20px;
+    border-radius: 10px;
+
+    transition: 0.4s;
+}
+
+button:hover {
+    opacity: 0.7;
+}
+
+button:active {
+    background-color: var(--dark)
+}
