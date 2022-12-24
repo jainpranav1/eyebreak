@@ -12,18 +12,24 @@
 body {
     background-color: var(--dark);
     color: var(--light);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
 .watch {
-    text-align: center;
     background-color: var(--darker);
-    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0px 10px;
 }
 
 .time {
     font-size: 50px;
 }
-
 
 .controls {
     display: flex;
@@ -38,11 +44,9 @@ body {
     color: var(--light);
     font-size: 20px;
     background-color: var(--primary);
-    margin: 10px;
+    margin: 5px 10px 10px 10px;
     padding: 10px 20px;
     border-radius: 10px;
-
-    transition: 0.4s;
 }
 
 button:hover {
@@ -50,5 +54,5 @@ button:hover {
 }
 
 button:active {
-    background-color: var(--dark)
+    opacity: 0.5;
 }
