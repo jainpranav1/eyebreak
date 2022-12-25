@@ -64,7 +64,7 @@ function on() {
 function off() {
     clearInterval(work_interval);
     clearInterval(break_interval);
-    time_el.innerHTML = '00:00';
+    time_el.innerHTML = '20:00';
 }
 
 on_btn.addEventListener("click", on);
