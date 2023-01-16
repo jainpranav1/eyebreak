@@ -1,7 +1,7 @@
 :root {
-    --primary: #7ED957;
+    --primary: #CC2C26;
     --light: #FFFFFF;
-    --dark: #292F33;
+    --dark: #000000;
 }
 
 * {
@@ -34,7 +34,7 @@ body {
     border: none;
     cursor: pointer;
 
-    color: var(--dark);
+    color: var(--light);
     font-size: 20px;
     background-color: var(--primary);
     margin: 5px 10px 10px 10px;
