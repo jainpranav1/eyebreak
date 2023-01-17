@@ -2,24 +2,14 @@
     "manifest_version": 3,
     "name": "EyeBreak",
     "version": "1.0",
-    "content_scripts": [
-        {
-            "matches": [
-                "<all_urls>"
-            ],
-            "js": [
-                "content.js"
-            ]
-        }
-    ],
     "background": {
         "service_worker": "background.js"
     },
     "action": {
-        "default_icon": "images/green_eyeball.png",
-        "default_popup": "popup.html"
+        "default_icon": "images/red_eyeball.png"
     },
     "permissions": [
-        "tabs"
+        "tabs",
+        "alarms"
     ]
 }

@@ -1,103 +1,59 @@
-let WORK_SECONDS = 20 * 60;
-let BREAK_SECONDS = 20;
-let work_seconds = null;
-let break_seconds = null;
-let work_interval = null;
-let break_interval = null;
-let main_port = null;
+let WORK_TIME_SEC = 20 * 60;
+let BREAK_TIME_SEC = 20;
+let VIDEO_URL = "https://youtu.be/MKC9LvRivTM?t=7";
+let tab_id = null;
+let is_on = false;
 
-function format_time(seconds) {
+chrome.action.onClicked.addListener(
+    () => {
 
-    let secs = seconds % 60;
-    let mins = Math.floor(seconds / 60);
+        if (is_on) {
 
-    if (secs < 10) {
-        secs = `0${secs}`;
+            is_on = false;
+            chrome.action.setIcon(
+                { path: "images/red_eyeball.png" })
+
+            chrome.alarms.clearAll()
+        }
+        else {
+
+            is_on = true;
+            chrome.action.setIcon(
+                { path: "images/green_eyeball.png" })
+
+
+            chrome.alarms.create("work alarm", {
+                delayInMinutes: WORK_TIME_SEC * 1 / 60
+            })
+        }
     }
+)
 
-    if (mins < 10) {
-        mins = `0${mins}`;
-    }
+chrome.alarms.onAlarm.addListener(
 
-    return `${mins}:${secs}`;
-}
+    (alarm) => {
 
-function work_timer() {
-    work_seconds = WORK_SECONDS;
+        if (alarm.name == "work alarm") {
+            chrome.alarms.clear("work alarm");
 
-    if (main_port) {
-        main_port.postMessage({ time: format_time(work_seconds) })
-    }
+            chrome.tabs.create({ 'url': VIDEO_URL }, tab => {
+                tab_id = tab.id;
 
-    work_interval = setInterval(() => {
-
-        if (work_seconds == 1) {
-            work_seconds = null;
-            clearInterval(work_interval);
-            break_timer();
-            return;
+                chrome.alarms.create("break alarm", {
+                    delayInMinutes: BREAK_TIME_SEC * 1 / 60
+                })
+            })
         }
 
-        work_seconds--;
+        else if (alarm.name == "break alarm") {
+            chrome.alarms.clear("break alarm");
 
-        if (main_port) {
-            main_port.postMessage({ time: format_time(work_seconds) })
+            chrome.tabs.remove(tab_id);
+            tab_id = null;
+
+            chrome.alarms.create("work alarm", {
+                delayInMinutes: WORK_TIME_SEC * 1 / 60
+            })
         }
-
-    }, 1000);
-}
-
-function break_timer() {
-    break_seconds = BREAK_SECONDS;
-
-    chrome.tabs.create({ 'url': "https://youtu.be/MKC9LvRivTM?t=7" }, tab => {
-
-        if (main_port) {
-            main_port.postMessage({ time: format_time(break_seconds) })
-        }
-
-        break_interval = setInterval(() => {
-
-            if (break_seconds == 1) {
-                break_seconds = null;
-                clearInterval(break_interval);
-                chrome.tabs.remove(tab.id);
-                work_timer();
-                return;
-            }
-
-            break_seconds--;
-
-            if (main_port) {
-                main_port.postMessage({ time: format_time(break_seconds) })
-            }
-
-        }, 1000);
-
-    });
-}
-
-chrome.runtime.onConnect.addListener(port => {
-    main_port = port;
-
-    if (work_seconds) {
-        port.postMessage({ time: format_time(work_seconds) })
     }
-    if (break_seconds) {
-        port.postMessage({ time: format_time(break_seconds) })
-    }
-
-    port.onMessage.addListener(msg => {
-        if (msg.button_pressed == "on" && !work_seconds && !break_seconds) {
-            work_timer();
-        }
-        else if (msg.button_pressed == "off") {
-            clearInterval(work_interval);
-            clearInterval(break_interval);
-            port.postMessage({ time: format_time(WORK_SECONDS) })
-        }
-    });
-    port.onDisconnect.addListener(() => {
-        main_port = null;
-    });
-});
+)
