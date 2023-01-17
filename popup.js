@@ -10,9 +10,9 @@ port.onMessage.addListener(msg => {
 });
 
 on_btn.addEventListener("click", () => {
-    port.postMessage({ button_pressed: "on" })
+    port.postMessage({ button_pressed: "on" });
 });
 
 off_btn.addEventListener("click", () => {
-    port.postMessage({ button_pressed: "off" })
+    port.postMessage({ button_pressed: "off" });
 });

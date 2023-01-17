@@ -81,7 +81,7 @@ chrome.runtime.onConnect.addListener(port => {
     }
 
     port.onMessage.addListener(msg => {
-        if (msg.button_pressed == "on") {
+        if (msg.button_pressed == "on" && !work_seconds && !break_seconds) {
             work_timer();
         }
         else if (msg.button_pressed == "off") {
