@@ -1,31 +1,38 @@
 let WORK_TIME_SEC = 20 * 60;
 let BREAK_TIME_SEC = 20;
 let VIDEO_URL = "https://youtu.be/MKC9LvRivTM?t=7";
-let tab_id = null;
-let is_on = false;
+
+chrome.runtime.onInstalled.addListener(() => {
+    chrome.storage.local.set({ 'is_on': false, "tab_id": null });
+});
 
 chrome.action.onClicked.addListener(
     () => {
 
-        if (is_on) {
+        chrome.storage.local.get(['is_on'], result => {
 
-            is_on = false;
-            chrome.action.setIcon(
-                { path: "images/red_eyeball.png" })
+            if (result.is_on) {
 
-            chrome.alarms.clearAll()
-        }
-        else {
+                chrome.storage.local.set({ 'is_on': false });
 
-            is_on = true;
-            chrome.action.setIcon(
-                { path: "images/green_eyeball.png" })
+                chrome.action.setIcon(
+                    { path: "images/red_eyeball.png" })
+
+                chrome.alarms.clearAll()
+            }
+            else {
+
+                chrome.storage.local.set({ 'is_on': true });
+
+                chrome.action.setIcon(
+                    { path: "images/green_eyeball.png" })
 
 
-            chrome.alarms.create("work alarm", {
-                delayInMinutes: WORK_TIME_SEC * 1 / 60
-            })
-        }
+                chrome.alarms.create("work alarm", {
+                    delayInMinutes: WORK_TIME_SEC * 1 / 60
+                })
+            }
+        })
     }
 )
 
@@ -37,7 +44,8 @@ chrome.alarms.onAlarm.addListener(
             chrome.alarms.clear("work alarm");
 
             chrome.tabs.create({ 'url': VIDEO_URL }, tab => {
-                tab_id = tab.id;
+
+                chrome.storage.local.set({ 'tab_id': tab.id });
 
                 chrome.alarms.create("break alarm", {
                     delayInMinutes: BREAK_TIME_SEC * 1 / 60
@@ -48,11 +56,14 @@ chrome.alarms.onAlarm.addListener(
         else if (alarm.name == "break alarm") {
             chrome.alarms.clear("break alarm");
 
-            chrome.tabs.remove(tab_id);
-            tab_id = null;
+            chrome.storage.local.get(['tab_id'], result => {
 
-            chrome.alarms.create("work alarm", {
-                delayInMinutes: WORK_TIME_SEC * 1 / 60
+                chrome.tabs.remove(result.tab_id);
+                chrome.storage.local.set({ 'tab_id': null });
+
+                chrome.alarms.create("work alarm", {
+                    delayInMinutes: WORK_TIME_SEC * 1 / 60
+                })
             })
         }
     }

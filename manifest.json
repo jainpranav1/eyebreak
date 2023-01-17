@@ -10,6 +10,7 @@
     },
     "permissions": [
         "tabs",
-        "alarms"
+        "alarms",
+        "storage"
     ]
 }
