@@ -13,7 +13,7 @@
         }
     ],
     "background": {
-        "js": "background.js"
+        "service_worker": "background.js"
     },
     "action": {
         "default_icon": "images/green_eyeball.png",
