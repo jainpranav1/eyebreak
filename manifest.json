@@ -18,5 +18,8 @@
     "action": {
         "default_icon": "images/green_eyeball.png",
         "default_popup": "popup.html"
-    }
+    },
+    "permissions": [
+        "tabs"
+    ]
 }

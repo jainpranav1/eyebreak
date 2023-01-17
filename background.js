@@ -1,3 +1,5 @@
+let WORK_SECONDS = 20 * 60;
+let BREAK_SECONDS = 20;
 let work_seconds = null;
 let break_seconds = null;
 let work_interval = null;
@@ -21,7 +23,7 @@ function format_time(seconds) {
 }
 
 function work_timer() {
-    work_seconds = 20 * 60;
+    work_seconds = WORK_SECONDS;
 
     if (main_port) {
         main_port.postMessage({ time: format_time(work_seconds) })
@@ -46,28 +48,33 @@ function work_timer() {
 }
 
 function break_timer() {
-    break_seconds = 20;
+    break_seconds = BREAK_SECONDS;
 
-    if (main_port) {
-        main_port.postMessage({ time: format_time(break_seconds) })
-    }
-
-    break_interval = setInterval(() => {
-
-        if (break_seconds == 1) {
-            break_seconds = null;
-            clearInterval(break_interval);
-            work_timer();
-            return;
-        }
-
-        break_seconds--;
+    chrome.tabs.create({ 'url': "https://youtu.be/MKC9LvRivTM?t=7" }, tab => {
 
         if (main_port) {
             main_port.postMessage({ time: format_time(break_seconds) })
         }
 
-    }, 1000);
+        break_interval = setInterval(() => {
+
+            if (break_seconds == 1) {
+                break_seconds = null;
+                clearInterval(break_interval);
+                chrome.tabs.remove(tab.id);
+                work_timer();
+                return;
+            }
+
+            break_seconds--;
+
+            if (main_port) {
+                main_port.postMessage({ time: format_time(break_seconds) })
+            }
+
+        }, 1000);
+
+    });
 }
 
 chrome.runtime.onConnect.addListener(port => {
@@ -87,7 +94,7 @@ chrome.runtime.onConnect.addListener(port => {
         else if (msg.button_pressed == "off") {
             clearInterval(work_interval);
             clearInterval(break_interval);
-            port.postMessage({ time: format_time(20 * 60) })
+            port.postMessage({ time: format_time(WORK_SECONDS) })
         }
     });
     port.onDisconnect.addListener(() => {
