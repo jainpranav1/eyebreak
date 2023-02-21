@@ -69,7 +69,7 @@ chrome.alarms.onAlarm.addListener(
 
             }
             else {
-                chrome.alarm.clear(alarm.name)
+                chrome.alarms.clear(alarm.name)
             }
         })
     }
