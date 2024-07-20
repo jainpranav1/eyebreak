@@ -3,7 +3,8 @@
   "name": "EyeBreak",
   "version": "1.0",
   "background": {
-    "service_worker": "service_worker.js"
+    "service_worker": "service_worker.js",
+    "type": "module"
   },
   "action": {
     "default_icon": "images/red_eyeball.png"

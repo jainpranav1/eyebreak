@@ -1,5 +1,43 @@
-let WORK_TIME_SEC = 5; // 20 * 60;
-let BREAK_TIME_SEC = 20;
+import { GoogleGenerativeAI } from "./generative_ai.js";
+
+const API_KEY = "";
+
+const genAI = new GoogleGenerativeAI(API_KEY);
+
+const model = genAI.getGenerativeModel({
+  model: "gemini-1.5-flash",
+  generation_config: { response_mime_type: "application/json" },
+});
+
+const WORK_TIME_SEC = 20; // 20 * 60;
+const BREAK_TIME_SEC = 20;
+
+let gemini_responses = [];
+
+async function add_gemini_response() {
+  const prompt = `
+  Provide a random hindi word, the hindi word's english translation,
+  a 10 second hindi sentence using the hindi word, and the hindi sentence's english translation
+  using the following JSON schema:
+
+  {
+      "hindi_word": str,
+      "english_word: str,
+      "hindi_sentence": str,
+      "english_sentence": str
+  }
+  
+  Do not include any markdown.
+  Do not create any JSON schemas identical to those in the following list: ${gemini_responses}.
+`;
+
+  const result = await model.generateContent(prompt);
+  const response = await result.response;
+  const json_str = response.text();
+  const json_obj = JSON.parse(json_str);
+
+  gemini_responses.push(json_obj);
+}
 
 chrome.runtime.onInstalled.addListener(async () => {
   await chrome.storage.local.set({
@@ -18,7 +56,7 @@ chrome.runtime.onStartup.addListener(async () => {
 });
 
 chrome.action.onClicked.addListener(async () => {
-  let result = await chrome.storage.local.get(["is_on", "alarm_suffix"]);
+  const result = await chrome.storage.local.get(["is_on", "alarm_suffix"]);
 
   if (result.is_on) {
     await chrome.storage.local.set({ is_on: false, tab_id: null });
@@ -30,17 +68,21 @@ chrome.action.onClicked.addListener(async () => {
     await chrome.alarms.create("work alarm" + result.alarm_suffix, {
       delayInMinutes: (WORK_TIME_SEC * 1) / 60,
     });
+
+    await add_gemini_response();
   }
 });
 
 chrome.alarms.onAlarm.addListener(async (alarm) => {
-  let result = await chrome.storage.local.get(["tab_id", "alarm_suffix"]);
+  const result = await chrome.storage.local.get(["tab_id", "alarm_suffix"]);
 
   if (alarm.name == "work alarm" + result.alarm_suffix) {
     await chrome.alarms.clear("work alarm" + result.alarm_suffix);
 
-    let tab = await chrome.tabs.create({ url: "index.html" });
+    const tab = await chrome.tabs.create({ url: "index.html" });
     await chrome.storage.local.set({ tab_id: tab.id });
+
+    await chrome.tabs.sendMessage(tab.id, gemini_responses[-1]);
 
     await chrome.alarms.create("break alarm" + result.alarm_suffix, {
       delayInMinutes: (BREAK_TIME_SEC * 1) / 60,
@@ -55,13 +97,15 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
     await chrome.alarms.create("work alarm" + result.alarm_suffix, {
       delayInMinutes: (WORK_TIME_SEC * 1) / 60,
     });
+
+    await add_gemini_response();
   } else {
     await chrome.alarms.clear(alarm.name);
   }
 });
 
 chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
-  let result = await chrome.storage.local.get(["tab_id"]);
+  const result = await chrome.storage.local.get(["tab_id"]);
 
   if (tabId == result.tab_id) {
     await chrome.storage.local.set({ tab_id: null });
