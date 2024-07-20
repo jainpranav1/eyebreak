@@ -1,16 +1,12 @@
 {
-    "manifest_version": 3,
-    "name": "EyeBreak",
-    "version": "1.0",
-    "background": {
-        "service_worker": "background.js"
-    },
-    "action": {
-        "default_icon": "images/red_eyeball.png"
-    },
-    "permissions": [
-        "tabs",
-        "alarms",
-        "storage"
-    ]
+  "manifest_version": 3,
+  "name": "EyeBreak",
+  "version": "1.0",
+  "background": {
+    "service_worker": "service_worker.js"
+  },
+  "action": {
+    "default_icon": "images/red_eyeball.png"
+  },
+  "permissions": ["tabs", "alarms", "storage", "tts"]
 }

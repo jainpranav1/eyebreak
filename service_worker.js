@@ -1,6 +1,5 @@
-let WORK_TIME_SEC = 20 * 60;
+let WORK_TIME_SEC = 5; // 20 * 60;
 let BREAK_TIME_SEC = 20;
-let VIDEO_URL = "https://youtu.be/MKC9LvRivTM?t=7";
 
 chrome.runtime.onInstalled.addListener(async () => {
   await chrome.storage.local.set({
@@ -40,7 +39,7 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name == "work alarm" + result.alarm_suffix) {
     await chrome.alarms.clear("work alarm" + result.alarm_suffix);
 
-    let tab = await chrome.tabs.create({ url: VIDEO_URL });
+    let tab = await chrome.tabs.create({ url: "index.html" });
     await chrome.storage.local.set({ tab_id: tab.id });
 
     await chrome.alarms.create("break alarm" + result.alarm_suffix, {
