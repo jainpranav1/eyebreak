@@ -10,7 +10,7 @@ const model = genAI.getGenerativeModel({
 });
 
 const WORK_TIME_SEC = 20; // 20 * 60;
-const BREAK_TIME_SEC = 20;
+const BREAK_TIME_SEC = 500; // 20
 
 let gemini_responses = [];
 
@@ -73,6 +73,12 @@ chrome.action.onClicked.addListener(async () => {
   }
 });
 
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message == "send json") {
+    sendResponse(gemini_responses.at(-1));
+  }
+});
+
 chrome.alarms.onAlarm.addListener(async (alarm) => {
   const result = await chrome.storage.local.get(["tab_id", "alarm_suffix"]);
 
@@ -81,8 +87,6 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
 
     const tab = await chrome.tabs.create({ url: "index.html" });
     await chrome.storage.local.set({ tab_id: tab.id });
-
-    await chrome.tabs.sendMessage(tab.id, gemini_responses[-1]);
 
     await chrome.alarms.create("break alarm" + result.alarm_suffix, {
       delayInMinutes: (BREAK_TIME_SEC * 1) / 60,
