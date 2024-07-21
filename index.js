@@ -1,5 +1,6 @@
 (async () => {
   const response = await chrome.runtime.sendMessage((message = "send json"));
+  console.log(response);
   const text = `
     Please look away from your screen.
     Your hindi word is ${response.hindi_word}.

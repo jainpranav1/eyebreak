@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from "./generative_ai.js";
 
-const WORK_TIME_SEC = 20 * 60;
-const BREAK_TIME_SEC = 20;
+const WORK_TIME_SEC = 20; // * 60;
+const BREAK_TIME_SEC = 500;
 
 const API_KEY = "";
 
@@ -12,9 +12,9 @@ const model = gen_ai.getGenerativeModel({
   generation_config: { response_mime_type: "application/json" },
 });
 
-let gemini_responses = [];
-
 async function add_gemini_response() {
+  let storage_result = await chrome.storage.local.get(["gemini_responses"]);
+
   const prompt = `
   Provide a random hindi word, the hindi word's english translation,
   a 10 second hindi sentence using the hindi word, and the hindi sentence's english translation
@@ -28,15 +28,18 @@ async function add_gemini_response() {
   }
   
   Do not include any markdown.
-  Do not create any JSON schemas identical to those in the following list: ${gemini_responses}.
+  Do not create any JSON schemas identical to those in the following list: ${storage_result.gemini_responses}.
 `;
 
-  const result = await model.generateContent(prompt);
-  const response = await result.response;
+  const gen_ai_result = await model.generateContent(prompt);
+  const response = await gen_ai_result.response;
   const json_str = response.text();
   const json_obj = JSON.parse(json_str);
 
-  gemini_responses.push(json_obj);
+  storage_result.gemini_responses.push(json_obj);
+  await chrome.storage.local.set({
+    gemini_responses: storage_result.gemini_responses,
+  });
 }
 
 chrome.runtime.onInstalled.addListener(async () => {
@@ -44,6 +47,7 @@ chrome.runtime.onInstalled.addListener(async () => {
     is_on: false,
     tab_id: null,
     alarm_suffix: Date.now(),
+    gemini_responses: [],
   });
 });
 
@@ -52,6 +56,7 @@ chrome.runtime.onStartup.addListener(async () => {
     is_on: false,
     tab_id: null,
     alarm_suffix: Date.now(),
+    gemini_responses: [],
   });
 });
 
@@ -102,9 +107,15 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
   }
 });
 
+// https://stackoverflow.com/questions/44056271/chrome-runtime-onmessage-response-with-async-await
 chrome.runtime.onMessage.addListener((message, _sender, send_response) => {
   if (message == "send json") {
-    send_response(gemini_responses.at(-1));
+    (async () => {
+      let storage_result = await chrome.storage.local.get(["gemini_responses"]);
+      send_response(storage_result.gemini_responses.at(-1));
+    })();
+
+    return true;
   }
 });
 
