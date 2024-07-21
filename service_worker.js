@@ -1,16 +1,16 @@
 import { GoogleGenerativeAI } from "./generative_ai.js";
 
+const WORK_TIME_SEC = 20; // 20 * 60;
+const BREAK_TIME_SEC = 20; // 20
+
 const API_KEY = "";
 
-const genAI = new GoogleGenerativeAI(API_KEY);
+const gen_ai = new GoogleGenerativeAI(API_KEY);
 
-const model = genAI.getGenerativeModel({
+const model = gen_ai.getGenerativeModel({
   model: "gemini-1.5-flash",
   generation_config: { response_mime_type: "application/json" },
 });
-
-const WORK_TIME_SEC = 20; // 20 * 60;
-const BREAK_TIME_SEC = 500; // 20
 
 let gemini_responses = [];
 
@@ -66,16 +66,10 @@ chrome.action.onClicked.addListener(async () => {
     await chrome.storage.local.set({ is_on: true });
     await chrome.action.setIcon({ path: "images/green_eyeball.png" });
     await chrome.alarms.create("work alarm" + result.alarm_suffix, {
-      delayInMinutes: (WORK_TIME_SEC * 1) / 60,
+      delayInMinutes: WORK_TIME_SEC / 60,
     });
 
     await add_gemini_response();
-  }
-});
-
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message == "send json") {
-    sendResponse(gemini_responses.at(-1));
   }
 });
 
@@ -89,7 +83,7 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
     await chrome.storage.local.set({ tab_id: tab.id });
 
     await chrome.alarms.create("break alarm" + result.alarm_suffix, {
-      delayInMinutes: (BREAK_TIME_SEC * 1) / 60,
+      delayInMinutes: BREAK_TIME_SEC / 60,
     });
   } else if (alarm.name == "break alarm" + result.alarm_suffix) {
     await chrome.alarms.clear("break alarm" + result.alarm_suffix);
@@ -99,7 +93,7 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
     }
     await chrome.storage.local.set({ tab_id: null });
     await chrome.alarms.create("work alarm" + result.alarm_suffix, {
-      delayInMinutes: (WORK_TIME_SEC * 1) / 60,
+      delayInMinutes: WORK_TIME_SEC / 60,
     });
 
     await add_gemini_response();
@@ -108,7 +102,13 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
   }
 });
 
-chrome.tabs.onRemoved.addListener(async (tabId, removeInfo) => {
+chrome.runtime.onMessage.addListener((message, _sender, send_response) => {
+  if (message == "send json") {
+    send_response(gemini_responses.at(-1));
+  }
+});
+
+chrome.tabs.onRemoved.addListener(async (tabId) => {
   const result = await chrome.storage.local.get(["tab_id"]);
 
   if (tabId == result.tab_id) {
