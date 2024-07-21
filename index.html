@@ -4,10 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>EyeBreak</title>
-    <script src="index.js"></script>
+    <script defer src="index.js"></script>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <h1>Please look away from your screen.</h1>
+    <h1 id="my_header">Please look away from your screen.</h1>
+    <audio id="my_audio" autoplay>
+      <source src="relaxing_music.mp3" type="audio/mpeg" />
+      Your browser does not support the audio element.
+    </audio>
   </body>
 </html>

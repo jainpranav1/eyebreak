@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI } from "./generative_ai.js";
 
-const WORK_TIME_SEC = 20; // 20 * 60;
-const BREAK_TIME_SEC = 20; // 20
+const WORK_TIME_SEC = 20 * 60;
+const BREAK_TIME_SEC = 20;
 
 const API_KEY = "";
 

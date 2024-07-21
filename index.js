@@ -9,3 +9,5 @@
   `;
   await chrome.tts.speak(text, { lang: "hi", rate: 0.9 });
 })();
+
+document.getElementById("my_audio").volume = 0.5;
